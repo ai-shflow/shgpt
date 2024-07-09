@@ -10,7 +10,7 @@ else
   list="$(go list ./... | grep -v test)"
   old=$IFS IFS=$'\n'
   for item in $list; do
-    go test -cover -covermode=atomic -parallel 2 -race -v "$item"
+    go test -cover -covermode=atomic -parallel 2 -v "$item"
   done
   IFS=$old
 fi

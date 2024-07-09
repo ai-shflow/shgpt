@@ -10,7 +10,7 @@
 
 ## Introduction
 
-*shgpt* is the shell gpts of [shai](https://github.com/cligpt/shai) written in Go.
+*shgpt* is the shell gpt of [shai](https://github.com/cligpt/shai) written in Go.
 
 
 

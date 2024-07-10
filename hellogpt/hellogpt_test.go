@@ -11,12 +11,12 @@ func TestInit(t *testing.T) {
 	assert.Equal(t, nil, nil)
 }
 
-func TestRun(t *testing.T) {
+func TestDeinit(t *testing.T) {
 	// TBD: FIXME
 	assert.Equal(t, nil, nil)
 }
 
-func TestDeinit(t *testing.T) {
+func TestRun(t *testing.T) {
 	// TBD: FIXME
 	assert.Equal(t, nil, nil)
 }

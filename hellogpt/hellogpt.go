@@ -30,6 +30,15 @@ func (c *Context) Init() error {
 	return nil
 }
 
+func (c *Context) Deinit() error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	// TBD: FIXME
+
+	return nil
+}
+
 func (c *Context) Run(args map[string]string) (string, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -39,13 +48,4 @@ func (c *Context) Run(args map[string]string) (string, error) {
 	// TBD: FIXME
 
 	return ret, nil
-}
-
-func (c *Context) Deinit() error {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	// TBD: FIXME
-
-	return nil
 }

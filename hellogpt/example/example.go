@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
-	"github.com/alecthomas/kingpin/v2"
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 
 	"github.com/cligpt/shgpt/hellogpt"
 	"github.com/cligpt/shgpt/hellogpt/config"
@@ -17,12 +18,32 @@ const (
 )
 
 var (
-	app      = kingpin.New(gptName, "hello gpt").Version(config.Version + "-build-" + config.Build)
-	logLevel = app.Flag("log-level", "Log level (DEBUG|INFO|WARN|ERROR)").Default("WARN").String()
+	logLevel string
 )
 
+var rootCmd = &cobra.Command{
+	Use:     gptName,
+	Version: config.Version + "-build-" + config.Build,
+	Short:   "hello gpt",
+	Long:    "hello gpt",
+	Run: func(cmd *cobra.Command, args []string) {
+		cobra.CheckErr(loadConfig(context.Background()))
+	},
+}
+
+// nolint: gochecknoinits
+func init() {
+	cobra.OnInitialize()
+
+	rootCmd.Flags().StringVarP(&logLevel, "log-level", "l", "WRAN", "log level (DEBUG|INFO|WARN|ERROR)")
+}
+
+func execute() error {
+	return rootCmd.Execute()
+}
+
 func main() {
-	if err := run(); err != nil {
+	if err := execute(); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
@@ -30,10 +51,8 @@ func main() {
 	os.Exit(0)
 }
 
-func run() error {
-	kingpin.MustParse(app.Parse(os.Args[1:]))
-
-	logger, err := initLogger(*logLevel)
+func loadConfig(_ context.Context) error {
+	logger, err := initLogger(logLevel)
 	if err != nil {
 		return errors.Wrap(err, "failed to init logger")
 	}

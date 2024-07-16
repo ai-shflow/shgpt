@@ -43,9 +43,8 @@ func (c *Context) Run(args map[string]string) (string, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	var ret string
-
 	// TBD: FIXME
+	ret := "hello gpt"
 
 	return ret, nil
 }

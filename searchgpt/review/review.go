@@ -19,6 +19,7 @@ const (
 
 	queryLimit = 1000
 
+	urlAccount = "/accounts/"
 	urlChanges = "/changes/"
 	urlNumber  = "&n="
 	urlOption  = "&o="
@@ -28,6 +29,7 @@ const (
 )
 
 type Review interface {
+	Account(string) (string, error)
 	Query(string, int, int) ([]interface{}, error)
 }
 
@@ -60,6 +62,21 @@ func New() Review {
 	return &review{
 		cfg: &cfg,
 	}
+}
+
+func (r *review) Account(name string) (string, error) {
+	var buf []interface{}
+
+	data, err := r.get(r.urlAccount(name, []string{"DETAILS"}))
+	if err != nil {
+		return "", nil
+	}
+
+	if err := json.Unmarshal(data[4:], &buf); err != nil {
+		return "", nil
+	}
+
+	return buf[0].(map[string]interface{})["email"].(string), nil
 }
 
 func (r *review) Query(search string, start, count int) ([]interface{}, error) {
@@ -113,6 +130,18 @@ func (r *review) unmarshalList(data []byte) ([]interface{}, error) {
 	}
 
 	return buf, nil
+}
+
+func (r *review) urlAccount(name string, option []string) string {
+	account := urlQuery + url.PathEscape(name) + urlOption + strings.Join(option, urlOption) +
+		urlNumber + strconv.Itoa(1)
+
+	buf := r.cfg.Gerrit[0].Url + urlAccount + account
+	if r.cfg.Gerrit[0].User != "" && r.cfg.Gerrit[0].Pass != "" {
+		buf = r.cfg.Gerrit[0].Url + urlPrefix + urlAccount + account
+	}
+
+	return buf
 }
 
 func (r *review) urlQuery(search string, option []string, start int) string {

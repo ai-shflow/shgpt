@@ -32,6 +32,11 @@ func initReview(t *testing.T) review {
 	return review{cfg: cfg}
 }
 
+func TestAccount(t *testing.T) {
+	// TBD: FIXME
+	assert.Equal(t, nil, nil)
+}
+
 func TestQuery(t *testing.T) {
 	var buf []interface{}
 	var err error
@@ -50,6 +55,11 @@ func TestQuery(t *testing.T) {
 
 	ret, _ = json.Marshal(buf)
 	fmt.Printf("change: %s\n", string(ret))
+}
+
+func TestGetAccount(t *testing.T) {
+	// TBD: FIXME
+	assert.Equal(t, nil, nil)
 }
 
 func TestGetQuery(t *testing.T) {

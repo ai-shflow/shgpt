@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -37,6 +38,7 @@ var rootCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
 		var err error
 		if len(args) < 1 {
+			queryUser = queryAccount(queryUser)
 			now := time.Now()
 			querySince = now.Format(timeLayout)
 			yyyy, mm, dd := now.Date()
@@ -87,6 +89,7 @@ func parse(query string) (string, error) {
 		if queryUser == "" {
 			return "", errors.New("invalid query user")
 		}
+		queryUser = queryAccount(queryUser)
 		return strings.Replace(query, "owner:self", "owner:"+queryUser, -1), nil
 	}
 
@@ -107,6 +110,29 @@ func execute() error {
 	}
 
 	return nil
+}
+
+func queryAccount(name string) string {
+	helper := func(name string) string {
+		re := regexp.MustCompile(`(\p{Han}+)(\d+)`)
+		matches := re.FindStringSubmatch(name)
+		if len(matches) < 1 {
+			return name
+		}
+		return matches[len(matches)-1]
+	}
+
+	r := review.New()
+	if r == nil {
+		return ""
+	}
+
+	buf, err := r.Account(helper(name))
+	if err != nil {
+		return ""
+	}
+
+	return buf
 }
 
 func queryReview(start, count int) error {

@@ -46,7 +46,7 @@ type review struct {
 }
 
 func New() Review {
-	var cfg *Config
+	var cfg Config
 
 	file, err := config.ConfigFile.ReadFile(configFile)
 	if err != nil {
@@ -58,7 +58,7 @@ func New() Review {
 	}
 
 	return &review{
-		cfg: cfg,
+		cfg: &cfg,
 	}
 }
 

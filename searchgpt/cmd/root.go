@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -11,16 +13,23 @@ import (
 )
 
 const (
-	columnNum = 6
+	columnNum = 4
 
 	defaultCount = 100
 	defaultStart = 1
+
+	timeLayout = "2006-01-02"
 )
 
 var (
-	queryCount  int
 	querySearch string
-	queryStart  int
+	queryUser   string
+
+	queryStart int
+	queryCount int
+
+	querySince string
+	queryUntil string
 )
 
 var rootCmd = &cobra.Command{
@@ -28,7 +37,11 @@ var rootCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
 		var err error
 		if len(args) < 1 {
-			querySearch = "owner:self"
+			now := time.Now()
+			querySince = now.Format(timeLayout)
+			yyyy, mm, dd := now.Date()
+			queryUntil = time.Date(yyyy, mm, dd+1, 0, 0, 0, 0, now.Location()).Format(timeLayout)
+			querySearch = fmt.Sprintf("owner:%s since:%s until:%s", queryUser, querySince, queryUntil)
 			return nil
 		}
 		if len(args) == 1 && args[0] == "help" {
@@ -64,10 +77,20 @@ func init() {
 
 	rootCmd.PersistentFlags().IntVarP(&queryStart, "start", "s", defaultStart, "query start")
 	rootCmd.PersistentFlags().IntVarP(&queryCount, "count", "c", defaultCount, "query count")
+	rootCmd.PersistentFlags().StringVarP(&queryUser, "user", "u", "", "query user")
+
+	_ = rootCmd.MarkPersistentFlagRequired("user")
 }
 
-func parse(data string) (string, error) {
-	return data, nil
+func parse(query string) (string, error) {
+	if strings.Contains(query, "owner:self") {
+		if queryUser == "" {
+			return "", errors.New("invalid query user")
+		}
+		return strings.Replace(query, "owner:self", "owner:"+queryUser, -1), nil
+	}
+
+	return query, nil
 }
 
 func execute() error {
@@ -100,10 +123,23 @@ func queryReview(start, count int) error {
 	cols := len(changes) / columnNum
 	remain := len(changes) % columnNum
 
+	if querySince != "" && queryUntil != "" {
+		fmt.Printf("%s: changes: since:%s until:%s\n\n", queryUser, querySince, queryUntil)
+	} else {
+		if querySince != "" && queryUntil == "" {
+			fmt.Printf("%s: changes: since:%s\n\n", queryUser, querySince)
+		} else if querySince == "" && queryUntil != "" {
+			fmt.Printf("%s: changes: until:%s\n\n", queryUser, queryUntil)
+		} else {
+			fmt.Printf("%s: changes\n\n", queryUser)
+		}
+	}
+
 	for i := range cols {
-		for index := i * columnNum; index < columnNum; index++ {
+		for index := i * columnNum; index < (i*columnNum + columnNum); index++ {
 			number := int(changes[index].(map[string]interface{})["_number"].(float64))
-			fmt.Printf("%d ", number)
+			status := changes[index].(map[string]interface{})["status"].(string)
+			fmt.Printf("%d (%s) ", number, strings.ToLower(status))
 		}
 		fmt.Println()
 	}
@@ -111,7 +147,8 @@ func queryReview(start, count int) error {
 	for i := range remain {
 		index := i + (cols * columnNum)
 		number := int(changes[index].(map[string]interface{})["_number"].(float64))
-		fmt.Printf("%d ", number)
+		status := changes[index].(map[string]interface{})["status"].(string)
+		fmt.Printf("%d (%s) ", number, strings.ToLower(status))
 	}
 
 	return nil

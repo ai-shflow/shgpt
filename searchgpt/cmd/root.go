@@ -177,5 +177,7 @@ func queryReview(start, count int) error {
 		fmt.Printf("%d (%s) ", number, strings.ToLower(status))
 	}
 
+	fmt.Println()
+
 	return nil
 }

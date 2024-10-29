@@ -56,7 +56,7 @@ var rootCmd = &cobra.Command{
 	},
 	Example: "  /search\n" +
 		fmt.Sprintf("  /search -s %d -c %d\n", defaultStart, defaultCount) +
-		"  /search \"project:name branch:master since:2024-01-01 until:2024-01-02\"\n",
+		"  /search \"project:name branch:master since:2024-01-01 until:2024-01-02\"",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := execute(); err != nil {
 			fmt.Println(err.Error())

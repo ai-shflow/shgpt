@@ -54,8 +54,7 @@ var rootCmd = &cobra.Command{
 		}
 		return nil
 	},
-	Example: "\n" +
-		"  /search\n" +
+	Example: "  /search\n" +
 		fmt.Sprintf("  /search -s %d -c %d\n", defaultStart, defaultCount) +
 		"  /search \"project:name branch:master since:2024-01-01 until:2024-01-02\"\n",
 	Run: func(cmd *cobra.Command, args []string) {
